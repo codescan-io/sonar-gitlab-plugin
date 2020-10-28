@@ -23,7 +23,7 @@
     <license.mailto>gabriel.allaigre@gmail.com</license.mailto>
     <license.owner>Talanlabs</license.owner>
 
-    <sonar.version>7.0</sonar.version>
+    <sonar.version>7.9.4</sonar.version>
     <sonar.pluginName>GitLab</sonar.pluginName>
     <sonar.pluginClass>com.talanlabs.sonar.plugins.gitlab.GitLabPlugin</sonar.pluginClass>
 
@@ -32,7 +32,7 @@
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:jar</artifactsToPublish>
 
-    <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
     <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec
     </jacoco.ut.execution.data.file>
 
@@ -82,6 +82,9 @@
     </contributor>
     <contributor>
       <name>David Marin Vaquero</name>
+    </contributor>
+    <contributor>
+      <name>Jakub Vavrik</name>
     </contributor>
   </contributors>
   <scm>
@@ -165,6 +168,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.1-jre</version>
     </dependency>
 
     <!-- unit tests -->
