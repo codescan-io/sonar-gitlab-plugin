@@ -49,6 +49,7 @@ public class GitLabPluginConfiguration {
     private final Configuration configuration;
     private final System2 system2;
     private final String baseUrl;
+    private final String baseDir;
 
     public GitLabPluginConfiguration(Configuration configuration, System2 system2) {
         super();
@@ -68,6 +69,7 @@ public class GitLabPluginConfiguration {
             tempBaseUrl += "/";
         }
         this.baseUrl = tempBaseUrl;
+        this.baseDir = configuration.get("sonar.projectBaseDir").orElse("");
     }
 
     public String projectId() {
@@ -191,7 +193,7 @@ public class GitLabPluginConfiguration {
     }
 
     public JsonMode jsonMode() {
-        JsonMode s = JsonMode.of(configuration.get(GitLabPlugin.GITLAB_JSON_MODE).orElse(null));
+        JsonMode s = JsonMode.of(configuration.get(GitLabPlugin.GITLAB_JSON_MODE).orElse("SAST"));
         return s != null ? s : JsonMode.NONE;
     }
 
@@ -266,6 +268,10 @@ public class GitLabPluginConfiguration {
 
     public String baseUrl() {
         return baseUrl;
+    }
+
+    public String baseDir() {
+        return baseDir;
     }
 
     public boolean isMergeRequestDiscussionEnabled() {

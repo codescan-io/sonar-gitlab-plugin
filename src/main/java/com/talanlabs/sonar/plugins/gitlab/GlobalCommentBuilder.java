@@ -142,7 +142,7 @@ public class GlobalCommentBuilder extends AbstractCommentBuilder {
     private void appendNewIssues(StringBuilder builder, Severity severity) {
         int issueCount = reporter.getIssueCountForSeverity(severity);
         if (issueCount > 0) {
-            builder.append("* ").append(markDownUtils.getEmojiForSeverity(severity)).append(" ").append(issueCount).append(" ").append(severity.name().toLowerCase(Locale.ENGLISH)).append("\n");
+            builder.append("* ").append(markDownUtils.getImageForSeverity(severity)).append(" ").append(issueCount).append(" ").append(severity.name().toLowerCase(Locale.ENGLISH)).append("\n");
         }
     }
 

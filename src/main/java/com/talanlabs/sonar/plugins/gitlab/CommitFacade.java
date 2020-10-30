@@ -168,7 +168,7 @@ public class CommitFacade {
     }
 
     public String getRuleLink(String ruleKey) {
-        return ruleUrlPrefix + "coding_rules#rule_key=" + encodeForUrl(ruleKey);
+        return ruleUrlPrefix + "coding_rules?rule_key=" + encodeForUrl(ruleKey) + "&open=" + encodeForUrl(ruleKey);
     }
 
     public void writeJsonFile(String json) {

@@ -137,7 +137,7 @@ public class GitLabPlugin implements Plugin {
                         PropertyDefinition.builder(GITLAB_ALL_ISSUES).name("All issues").description("Show all issues. (Default false, only new)").category(CATEGORY).subCategory(SUBCATEGORY)
                                 .type(PropertyType.BOOLEAN).defaultValue(String.valueOf(false)).index(26).build(),
                         PropertyDefinition.builder(GITLAB_JSON_MODE).name("Generate json report").description("Create a json report in root for GitLab EE").category(CATEGORY).subCategory(SUBCATEGORY)
-                                .type(PropertyType.SINGLE_SELECT_LIST).options(JsonMode.NONE.name(), JsonMode.CODECLIMATE.name(), JsonMode.SAST.name()).defaultValue(JsonMode.NONE.name()).onlyOnQualifiers(Qualifiers.PROJECT).index(27).build(),
+                                .type(PropertyType.SINGLE_SELECT_LIST).options(JsonMode.NONE.name(), JsonMode.SAST.name()).defaultValue(JsonMode.SAST.name()).onlyOnQualifiers(Qualifiers.PROJECT).index(27).build(),
                         PropertyDefinition.builder(GITLAB_QUERY_MAX_RETRY).name("Query max retry").description("Max retry for wait finish analyse for publish mode").category(CATEGORY).subCategory(SUBCATEGORY)
                                 .type(PropertyType.INTEGER).defaultValue(String.valueOf(50)).index(28).build(),
                         PropertyDefinition.builder(GITLAB_QUERY_WAIT).name("Query waiting between retry").description("Max retry for wait finish analyse for publish mode (millisecond)").category(CATEGORY).subCategory(SUBCATEGORY)

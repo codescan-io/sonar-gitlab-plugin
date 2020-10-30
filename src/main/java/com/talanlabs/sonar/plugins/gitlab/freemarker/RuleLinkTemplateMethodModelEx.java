@@ -48,7 +48,8 @@ public class RuleLinkTemplateMethodModelEx implements TemplateMethodModelEx {
     private Object execOneArg(Object arg) throws TemplateModelException {
         if (arg instanceof TemplateScalarModel) {
             String name = ((TemplateScalarModel) arg).getAsString();
-            return ruleUrlPrefix + "coding_rules#rule_key=" + CommitFacade.encodeForUrl(name);
+            String ruleKey = CommitFacade.encodeForUrl(name);
+            return ruleUrlPrefix + "coding_rules?rule_key=" + ruleKey + "&open=" + ruleKey;
         }
         throw new TemplateModelException("Failed call accept 1 url arg");
     }

@@ -20,6 +20,7 @@
 package com.talanlabs.sonar.plugins.gitlab;
 
 import org.sonar.api.batch.rule.Severity;
+import org.sonar.api.platform.Server;
 import org.sonar.api.scanner.ScannerSide;
 
 import javax.annotation.Nullable;
@@ -27,7 +28,17 @@ import javax.annotation.Nullable;
 @ScannerSide
 public class MarkDownUtils {
 
-    private static final String IMAGES_ROOT_URL = "https://github.com/gabrie-allaigre/sonar-gitlab-plugin/raw/master/images/";
+    private static final String CODE_SCAN_ICON_URL = "https://app.codescan.io/images/sonarcloud-square-logo.svg";
+
+    private final String publicRootUrl;
+
+    public MarkDownUtils() {
+        this(null);
+    }
+
+    public MarkDownUtils(Server server) {
+        this.publicRootUrl = server.getPublicRootUrl();
+    }
 
     public String getEmojiForSeverity(Severity severity) {
         switch (severity) {
@@ -47,12 +58,17 @@ public class MarkDownUtils {
     }
 
     public String getImageForSeverity(Severity severity) {
-        return "![" + severity + "](" + IMAGES_ROOT_URL + "severity-" + severity.name().toLowerCase() + ".png)";
+        String severityName = Mapper.toGitlabSeverity(severity).name();
+        return "[![" + severityName + "](" + publicRootUrl + "/static/gitlab/images/severity-" + severityName.toLowerCase() + ".svg)]()";
+    }
+
+    public String getRuleLinkWithImage(String ruleLink) {
+        return "[![More about violation](" + publicRootUrl + "/static/gitlab/images/codescan-logo.svg )](" + ruleLink + ")";
     }
 
     public String printIssue(Severity severity, String message, String ruleLink, @Nullable String url, @Nullable String componentKey) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getEmojiForSeverity(severity)).append(" ");
+         sb.append(getImageForSeverity(severity)).append(" ");
         if (url != null) {
             sb.append("[").append(message).append("]").append("(").append(url).append(")");
         } else {
@@ -61,7 +77,7 @@ public class MarkDownUtils {
                 sb.append(" ").append("(").append(componentKey).append(")");
             }
         }
-        sb.append(" ").append("[:blue_book:](").append(ruleLink).append(")");
+        sb.append(" ").append(getRuleLinkWithImage(ruleLink));
         return sb.toString();
     }
 }

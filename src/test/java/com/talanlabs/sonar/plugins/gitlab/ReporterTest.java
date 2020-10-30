@@ -22,6 +22,7 @@ package com.talanlabs.sonar.plugins.gitlab;
 import com.talanlabs.sonar.plugins.gitlab.models.JsonMode;
 import com.talanlabs.sonar.plugins.gitlab.models.QualityGate;
 import com.talanlabs.sonar.plugins.gitlab.models.QualityGateFailMode;
+import com.talanlabs.sonar.plugins.gitlab.models.Rule;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,17 +122,19 @@ public class ReporterTest {
     @Test
     public void oneIssueSast() {
         settings.setProperty(GitLabPlugin.GITLAB_JSON_MODE, JsonMode.SAST.name());
+        Rule rule = Rule.newBuilder().key("rule").build();
 
-        reporter.process(Utils.newIssue("123", "component", null, 10, Severity.INFO, true, "Issue \"NULL\"", "rule"), null, null, GITLAB_URL, "file", "http://myserver", true);
+        reporter.process(Utils.newIssue("123", "component", null, 10, Severity.INFO, true, "Issue \"NULL\"", "rule"), rule, null, GITLAB_URL, "file", "http://myserver", true);
 
-        Assertions.assertThat(reporter.buildJson()).isEqualTo("[{\"tool\":\"sonarqube\",\"fingerprint\":\"123\",\"message\":\"Issue \\\"NULL\\\"\",\"file\":\"file\",\"line\":\"10\",\"priority\":\"INFO\",\"solution\":\"http://myserver\"}]");
+        Assertions.assertThat(reporter.buildJson()).isEqualTo("{\"version\":\"8.0.1\",\"vulnerabilities\":\"[{\"id\":\"123\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue \\\"NULL\\\"\",\"severity\":\"Info\",\"solution\":\"http://myserver\",\"location\":{\"file\":\"file\",\"start_line\":\"10\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}}]\"}");
     }
 
     @Test
     public void oneIssueCodeClimate() {
         settings.setProperty(GitLabPlugin.GITLAB_JSON_MODE, JsonMode.CODECLIMATE.name());
+        Rule rule = Rule.newBuilder().key("rule").build();
 
-        reporter.process(Utils.newIssue("456", "component", null, 20, Severity.INFO, true, "Issue \"NULL\"", "rule"), null, null, GITLAB_URL, "file", "http://myserver", true);
+        reporter.process(Utils.newIssue("456", "component", null, 20, Severity.INFO, true, "Issue \"NULL\"", "rule"), rule, null, GITLAB_URL, "file", "http://myserver", true);
 
         Assertions.assertThat(reporter.buildJson()).isEqualTo("[{\"fingerprint\":\"456\",\"description\":\"Issue \\\"NULL\\\"\",\"location\":{\"path\":\"file\",\"lines\": { \"begin\":20,\"end\":20}}}]");
     }
@@ -139,12 +142,13 @@ public class ReporterTest {
     @Test
     public void issuesSast() {
         settings.setProperty(GitLabPlugin.GITLAB_JSON_MODE, JsonMode.SAST.name());
+        Rule rule = Rule.newBuilder().key("rule").build();
 
         for (int i = 0; i < 5; i++) {
-            reporter.process(Utils.newIssue("toto_" + i, "component", null, null, Severity.INFO, true, "Issue", "rule" + i), null, null, GITLAB_URL, "file", "http://myserver/rule" + i, true);
+            reporter.process(Utils.newIssue("toto_" + i, "component", null, null, Severity.INFO, true, "Issue", "rule" + i), rule, null, GITLAB_URL, "file", "http://myserver/rule" + i, true);
         }
 
-        Assertions.assertThat(reporter.buildJson()).isEqualTo("[{\"tool\":\"sonarqube\",\"fingerprint\":\"toto_0\",\"message\":\"Issue\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule0\"},{\"tool\":\"sonarqube\",\"fingerprint\":\"toto_1\",\"message\":\"Issue\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule1\"},{\"tool\":\"sonarqube\",\"fingerprint\":\"toto_2\",\"message\":\"Issue\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule2\"},{\"tool\":\"sonarqube\",\"fingerprint\":\"toto_3\",\"message\":\"Issue\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule3\"},{\"tool\":\"sonarqube\",\"fingerprint\":\"toto_4\",\"message\":\"Issue\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule4\"}]");
+        Assertions.assertThat(reporter.buildJson()).isEqualTo("{\"version\":\"8.0.1\",\"vulnerabilities\":\"[{\"id\":\"toto_0\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule0\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}},{\"id\":\"toto_1\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule1\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}},{\"id\":\"toto_2\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule2\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}},{\"id\":\"toto_3\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule3\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}},{\"id\":\"toto_4\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule4\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}}]\"}");
     }
 
     @Test
@@ -161,10 +165,11 @@ public class ReporterTest {
     @Test
     public void issuesJsonLine() {
         settings.setProperty(GitLabPlugin.GITLAB_JSON_MODE, JsonMode.SAST.name());
+        Rule rule = Rule.newBuilder().key("rule").build();
 
-        reporter.process(Utils.newIssue("toto", "component", null, null, Severity.INFO, true, "Issue\nline1\n\rline2", "rule"), null, null, GITLAB_URL, "file", "http://myserver/rule", true);
+        reporter.process(Utils.newIssue("toto", "component", null, null, Severity.INFO, true, "Issue\nline1\n\rline2", "rule"), rule, null, GITLAB_URL, "file", "http://myserver/rule", true);
 
-        Assertions.assertThat(reporter.buildJson()).isEqualTo("[{\"tool\":\"sonarqube\",\"fingerprint\":\"toto\",\"message\":\"Issue\\nline1\\n\\rline2\",\"file\":\"file\",\"line\":\"0\",\"priority\":\"INFO\",\"solution\":\"http://myserver/rule\"}]");
+        Assertions.assertThat(reporter.buildJson()).isEqualTo("{\"version\":\"8.0.1\",\"vulnerabilities\":\"[{\"id\":\"toto\",\"category\":\"sast\",\"name\":\"null\",\"description\":\"null\",\"identifiers\":[{\"type\":\"null\",\"value\":\"rule\",\"name\":\"null\"}],\"message\":\"Issue\\nline1\\n\\rline2\",\"severity\":\"Info\",\"solution\":\"http://myserver/rule\",\"location\":{\"file\":\"file\",\"start_line\":\"1\"},\"scanner\":{\"id\":\"codescan\",\"name\":\"CodeScan\"}}]\"}");
     }
 
     @Test

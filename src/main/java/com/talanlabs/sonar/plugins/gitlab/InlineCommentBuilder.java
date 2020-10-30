@@ -42,7 +42,7 @@ public class InlineCommentBuilder extends AbstractCommentBuilder {
     protected String buildDefaultComment() {
         String msg = reportIssues.stream()
                 .map(reportIssue -> markDownUtils.printIssue(reportIssue.getIssue().getSeverity(), reportIssue.getIssue().getMessage(), reportIssue.getRuleLink(), null, null))
-                .map(reportIssue -> reportIssues.size() > 1 ? "* " + reportIssue : reportIssue)
+                .map(reportIssue -> reportIssues.size() > 1 ? reportIssue + "  " : reportIssue)
                 .collect(Collectors.joining("\n"));
         if (gitLabPluginConfiguration.pingUser() && author != null) {
             if (reportIssues.size() > 1) {

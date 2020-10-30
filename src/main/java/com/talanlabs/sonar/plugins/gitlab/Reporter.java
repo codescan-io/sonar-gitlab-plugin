@@ -19,12 +19,22 @@
  */
 package com.talanlabs.sonar.plugins.gitlab;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.talanlabs.sonar.plugins.gitlab.models.*;
+import io.codescan.sast.model.Identifier;
+import io.codescan.sast.model.Location;
+import io.codescan.sast.model.Report;
+import io.codescan.sast.model.Scanner;
+import io.codescan.sast.model.Vulnerability;
+import io.codescan.sast.model.VulnerabilityCategory;
+import java.io.File;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.sonar.api.batch.rule.Severity;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +42,9 @@ import java.util.stream.Collectors;
 public class Reporter {
 
     static final List<Severity> SEVERITIES = Arrays.asList(Severity.BLOCKER, Severity.CRITICAL, Severity.MAJOR, Severity.MINOR, Severity.INFO);
+    private static final String SCANNER_ID = "codescan";
+    private static final String SCANNER_NAME = "CodeScan";
+    private static final Scanner SCANNER = new Scanner().setId(SCANNER_ID).setName(SCANNER_NAME);
 
     private final GitLabPluginConfiguration gitLabPluginConfiguration;
 
@@ -221,7 +234,7 @@ public class Reporter {
         if (gitLabPluginConfiguration.jsonMode().equals(JsonMode.CODECLIMATE)) {
             f = this::buildIssueCodeQualityJson;
         } else if (gitLabPluginConfiguration.jsonMode().equals(JsonMode.SAST)) {
-            f = this::buildIssueSastJson;
+            return buildSastJson(jsonIssues);
         } else {
             f = r -> "";
         }
@@ -250,21 +263,53 @@ public class Reporter {
         return sj.toString();
     }
 
-    private String buildIssueSastJson(ReportIssue reportIssue) {
-        Issue issue = reportIssue.getIssue();
+    private String buildSastJson(List<ReportIssue> issues) {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+                .setSerializationInclusion(Include.NON_NULL);
 
-        StringJoiner sj = new StringJoiner(",", "{", "}");
-        sj.add("\"tool\":\"sonarqube\"");
-        sj.add("\"fingerprint\":\"" + issue.getKey() + "\"");
-        sj.add("\"message\":\"" + prepareMessageJson(issue.getMessage()) + "\"");
-        sj.add("\"file\":\"" + reportIssue.getFile() + "\"");
-        sj.add("\"line\":\"" + (issue.getLine() != null ? issue.getLine() : 0) + "\"");
-        sj.add("\"priority\":\"" + issue.getSeverity().name() + "\"");
-        sj.add("\"solution\":\"" + reportIssue.getRuleLink() + "\"");
-        return sj.toString();
+        List<Vulnerability> vulnerabilities = issues.stream()
+                .map(this::mapSastIssue)
+                .collect(Collectors.toList());
+        Report report = new Report().setVulnerabilities(vulnerabilities);
+
+        try {
+            return objectMapper.writeValueAsString(report);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
     private String prepareMessageJson(String message) {
         return StringEscapeUtils.escapeJson(message);
+    }
+
+    private Vulnerability mapSastIssue(ReportIssue reportIssue) {
+        Issue issue = reportIssue.getIssue();
+        Rule rule = reportIssue.getRule();
+        String filePath = reportIssue.getFile() != null
+                ? reportIssue.getFile().replace(gitLabPluginConfiguration.baseDir(), "") : null;
+
+        Location location = new Location()
+                .setStartLine(issue.getLine())
+                .setFile(filePath);
+
+        Identifier identifier = new Identifier()
+                .setType(rule.getRepo())
+                .setValue(rule.getKey())
+                .setName(rule.getType())
+                .setUrl(reportIssue.getRuleLink());
+
+        return new Vulnerability()
+                .setId(issue.getKey())
+                .setCategory(VulnerabilityCategory.SAST)
+                .setScanner(SCANNER)
+                .setLocation(location)
+                .setName(rule.getName())
+                .setMessage(rule.getName())
+                .setDescription(rule.getDescription())
+                .setSeverity(Mapper.toGitlabSeverity(issue.getSeverity()))
+                .setSolution(issue.getMessage())
+                .setIdentifiers(Collections.singletonList(identifier));
     }
 }
